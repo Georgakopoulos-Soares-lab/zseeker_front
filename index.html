@@ -13,7 +13,6 @@
       rel="stylesheet"
     />
     <style>
-      
       body {
         background-color: #212529;
         color: #f8f9fa;
@@ -432,8 +431,7 @@
             <h2 class="graph-headers">Z-Score Distribution</h2>
           </div>
         </div>
-    
-  
+
         <div class="row">
           <div class="col-md-6">
             <canvas id="zScoreScatterPlot" width="100" height="100"></canvas>
@@ -442,13 +440,7 @@
             <canvas id="zScoreBoxPlot" width="100" height="100"></canvas>
           </div>
         </div>
-
       </div>
-
-      
-
-      
-
     </div>
 
     <div id="footer-container"></div>
@@ -636,10 +628,8 @@
       }
 
       $(document).ready(function () {
+        $(".graph-headers").hide(); // Shows
 
-        $('.graph-headers').hide(); // Shows
-
-        
         $("#loader").hide();
         chartJsDefauls();
 
@@ -695,8 +685,14 @@
           }
           $("#loader").show();
 
+          const backend_url =
+            window.location.hostname.includes("localhost") ||
+            window.location.hostname.includes("127.0.0.1")
+              ? "http://localhost:8080" // Dev
+              : "https://www.microsatellitesexplorer.com/zseeker_api"; // Prod
+
           $.ajax({
-            url: "http://localhost:8080/submit-job",
+            url: `${backend_url}/submit-job`,
             type: "POST",
             data: formData,
             processData: false,
@@ -712,8 +708,7 @@
               renderTable();
               renderScatterPlot();
               renderBoxPlot();
-              $('.graph-headers').show(); // Shows
-
+              $(".graph-headers").show(); // Shows
 
               // Show the results table
               $("#results").show();
@@ -1067,41 +1062,42 @@
       }
 
       function createVisualization(sequence) {
-    const wrapper = document.createElement("div");
-    wrapper.className = "sequence-wrapper";
+        const wrapper = document.createElement("div");
+        wrapper.className = "sequence-wrapper";
 
-    const originalSpan = document.createElement("span");
-    originalSpan.className = "original-sequence";
-    originalSpan.textContent = sequence;
-    wrapper.appendChild(originalSpan);
+        const originalSpan = document.createElement("span");
+        originalSpan.className = "original-sequence";
+        originalSpan.textContent = sequence;
+        wrapper.appendChild(originalSpan);
 
-    const container = document.createElement("div");
-    container.className = "sequence-container";
+        const container = document.createElement("div");
+        container.className = "sequence-container";
 
-    sequence = sequence.toString().toUpperCase();
-    const nucleotides = [...sequence].map(n => {
-        const span = document.createElement("span");
-        span.className = "nucleotide";
-        span.textContent = n;
-        span.style.display = "inline-block";
-        return span;
-    });
+        sequence = sequence.toString().toUpperCase();
+        const nucleotides = [...sequence].map((n) => {
+          const span = document.createElement("span");
+          span.className = "nucleotide";
+          span.textContent = n;
+          span.style.display = "inline-block";
+          return span;
+        });
 
-    // Simplified logic: just check each dinucleotide and color both nucleotides
-    for (let i = 0; i < sequence.length - 1; i++) {
-        const dinucleotide = sequence.substr(i, 2);
-        const colorClass = isValidDinucleotide(dinucleotide) ? "valid" : "invalid";
-        // Override any previous class
-        nucleotides[i].className = `nucleotide ${colorClass}`;
-        nucleotides[i + 1].className = `nucleotide ${colorClass}`;
-    }
+        // Simplified logic: just check each dinucleotide and color both nucleotides
+        for (let i = 0; i < sequence.length - 1; i++) {
+          const dinucleotide = sequence.substr(i, 2);
+          const colorClass = isValidDinucleotide(dinucleotide)
+            ? "valid"
+            : "invalid";
+          // Override any previous class
+          nucleotides[i].className = `nucleotide ${colorClass}`;
+          nucleotides[i + 1].className = `nucleotide ${colorClass}`;
+        }
 
-    nucleotides.forEach(n => container.appendChild(n));
-    wrapper.appendChild(container);
+        nucleotides.forEach((n) => container.appendChild(n));
+        wrapper.appendChild(container);
 
-    return wrapper.outerHTML;
-}
-
+        return wrapper.outerHTML;
+      }
     </script>
   </body>
 </html>
