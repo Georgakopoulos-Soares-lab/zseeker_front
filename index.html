@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ZSeeker</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap5.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      
+      body {
+        background-color: #212529;
+        color: #f8f9fa;
+      }
+
+      .form-control,
+      .form-select {
+        background-color: #2c3034;
+        color: #f8f9fa;
+        border-color: #495057;
+      }
+
+      .form-control:focus,
+      .form-select:focus {
+        background-color: #2c3034;
+        color: #f8f9fa;
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+      }
+
+      .btn-primary {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+      }
+
+      .btn-primary:hover {
+        background-color: #0b5ed7;
+        border-color: #0a58ca;
+      }
+
+      #results {
+        background-color: #2c3034;
+        border-color: #495057;
+      }
+
+      .dataTables_wrapper .dataTables_length,
+      .dataTables_wrapper .dataTables_filter,
+      .dataTables_wrapper .dataTables_info,
+      .dataTables_wrapper .dataTables_processing,
+      .dataTables_wrapper .dataTables_paginate {
+        color: #f8f9fa !important;
+      }
+
+      .dataTables_wrapper .dataTables_paginate .paginate_button {
+        color: #f8f9fa !important;
+      }
+
+      .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+      .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+        color: #212529 !important;
+      }
+
+      textarea::placeholder {
+        color: #fff;
+      }
+
+      .lds-ellipsis,
+      .lds-ellipsis div {
+        box-sizing: border-box;
+      }
+
+      .lds-ellipsis {
+        display: inline-block;
+        position: relative;
+        width: 80px;
+        height: 80px;
+      }
+
+      .lds-ellipsis div {
+        position: absolute;
+        top: 33.33333px;
+        width: 13.33333px;
+        height: 13.33333px;
+        border-radius: 50%;
+        background: currentColor;
+        animation-timing-function: cubic-bezier(0, 1, 1, 0);
+      }
+
+      .lds-ellipsis div:nth-child(1) {
+        left: 8px;
+        animation: lds-ellipsis1 0.6s infinite;
+      }
+
+      .lds-ellipsis div:nth-child(2) {
+        left: 8px;
+        animation: lds-ellipsis2 0.6s infinite;
+      }
+
+      .lds-ellipsis div:nth-child(3) {
+        left: 32px;
+        animation: lds-ellipsis2 0.6s infinite;
+      }
+
+      .lds-ellipsis div:nth-child(4) {
+        left: 56px;
+        animation: lds-ellipsis3 0.6s infinite;
+      }
+
+      @keyframes lds-ellipsis1 {
+        0% {
+          transform: scale(0);
+        }
+
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      @keyframes lds-ellipsis3 {
+        0% {
+          transform: scale(1);
+        }
+
+        100% {
+          transform: scale(0);
+        }
+      }
+
+      @keyframes lds-ellipsis2 {
+        0% {
+          transform: translate(0, 0);
+        }
+
+        100% {
+          transform: translate(24px, 0);
+        }
+      }
+
+      .lds-ellipsis-container {
+        max-width: fit-content;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .sequence-wrapper {
+        position: relative;
+        display: inline-block;
+      }
+
+      .sequence-container {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background: gray;
+        border: 1px solid #ccc;
+        padding: 5px;
+        z-index: 1000;
+        max-width: 600px; /* or whatever width you want */
+        white-space: normal; /* overrides the previous nowrap */
+      }
+
+      .sequence-wrapper:hover .sequence-container {
+        display: block;
+      }
+
+      .nucleotide {
+        display: inline-block;
+        padding: 2px 4px;
+        margin: 0 1px;
+        font-weight: bold;
+      }
+
+      .valid {
+        background-color: rgb(5, 187, 5);
+        border-bottom: 2px solid green;
+        color: black;
+      }
+
+      .invalid {
+        background-color: rgb(245, 121, 121);
+        border-bottom: 2px solid red;
+        color: black;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Container for the Navbar -->
+    <div id="navbar-container"></div>
+
+    <div class="container mt-5">
+      <!-- <h1 class="text-center mb-4">ZSeeker</h1> -->
+      <form id="zseeker-form">
+        <div class="row g-3">
+          <div class="col-md-12 mb-3">
+            <label for="method" class="form-label">Method</label>
+            <select class="form-select" id="method" name="method" required>
+              <option value="transitions" selected>Transitions</option>
+              <option value="coverage">Coverage</option>
+              <option value="layered">Layered</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label for="gc-weight" class="form-label">GC Weight</label>
+            <input
+              type="number"
+              class="form-control"
+              id="gc-weight"
+              name="gc_weight"
+              value="7.0"
+              step="0.1"
+              required
+            />
+          </div>
+          <div class="col-md-3">
+            <label for="gt-weight" class="form-label">GT Weight</label>
+            <input
+              type="number"
+              class="form-control"
+              id="gt-weight"
+              name="gt_weight"
+              value="1.25"
+              step="0.1"
+              required
+            />
+          </div>
+          <div class="col-md-3">
+            <label for="ac-weight" class="form-label">AC Weight</label>
+            <input
+              type="number"
+              class="form-control"
+              id="ac-weight"
+              name="ac_weight"
+              value="1.25"
+              step="0.1"
+              required
+            />
+          </div>
+          <div class="col-md-3">
+            <label for="at-weight" class="form-label">AT Weight</label>
+            <input
+              type="number"
+              class="form-control"
+              id="at-weight"
+              name="at_weight"
+              value="0.5"
+              step="0.1"
+              required
+            />
+          </div>
+          <div class="col-md-4">
+            <label for="mismatch-penalty-type" class="form-label"
+              >Mismatch Penalty Type</label
+            >
+            <select
+              class="form-select"
+              id="mismatch-penalty-type"
+              name="mismatch_penalty_type"
+              required
+            >
+              <option value="linear" selected>Linear</option>
+              <option value="exponential">Exponential</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label for="mismatch-penalty-start" class="form-label"
+              >Mismatch Penalty Starting Value</label
+            >
+            <input
+              type="number"
+              class="form-control"
+              id="mismatch-penalty-start"
+              name="mismatch_penalty_starting_value"
+              value="3.0"
+              step="0.1"
+              required
+            />
+          </div>
+          <div class="col-md-4">
+            <label for="mismatch-penalty-delta" class="form-label"
+              >Mismatch Penalty Linear Delta</label
+            >
+            <input
+              type="number"
+              class="form-control"
+              id="mismatch-penalty-delta"
+              name="mismatch_penalty_linear_delta"
+              value="3.0"
+              step="0.1"
+              required
+            />
+          </div>
+          <div class="col-md-4">
+            <label for="cadence-reward" class="form-label"
+              >Cadence Reward</label
+            >
+            <input
+              type="number"
+              class="form-control"
+              id="cadence-reward"
+              name="cadence_reward"
+              value="1"
+              step="0.1"
+              required
+            />
+          </div>
+          <div class="col-md-4">
+            <label for="threshold" class="form-label">Threshold</label>
+            <input
+              type="number"
+              class="form-control"
+              id="threshold"
+              name="threshold"
+              value="50"
+              required
+            />
+          </div>
+          <div class="col-md-4">
+            <label for="consecutive-at-scoring" class="form-label"
+              >Consecutive AT Scoring</label
+            >
+            <input
+              type="text"
+              class="form-control"
+              id="consecutive-at-scoring"
+              name="consecutive_at_scoring"
+              value="0.5,0.5,0.5,0.5,0.0,0.0,-5.0,-100.0"
+              required
+            />
+          </div>
+          <div class="col-12">
+            <label for="fasta-input" class="form-label">FASTA Input</label>
+            <textarea
+              class="form-control"
+              id="fasta-input"
+              name="fasta_input"
+              rows="5"
+            ></textarea>
+          </div>
+          <div class="col-md-4">
+            <label for="file-upload" class="form-label"
+              >Or Upload FASTA File</label
+            >
+            <input
+              type="file"
+              class="form-control"
+              id="file-upload"
+              accept=".fasta,.fa,.txt"
+            />
+          </div>
+          <div class="col-md-4">
+            <label for="n-jobs" class="form-label">N Jobs</label>
+            <input
+              type="number"
+              class="form-control"
+              id="n-jobs"
+              name="n_jobs"
+              value="8"
+              required
+            />
+          </div>
+          <div class="col-md-4 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">Submit</button>
+          </div>
+        </div>
+      </form>
+      <div class="lds-ellipsis-container">
+        <div class="lds-ellipsis" id="loader">
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+      </div>
+      <div id="results" class="mt-5 p-3 rounded">
+        <h2>Results</h2>
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label for="unique_sequences" class="form-label"
+              >Select Sequences</label
+            >
+            <select
+              class="form-select"
+              id="unique_sequences"
+              name="unique_sequences"
+              required
+            >
+              <option value="all" selected>All</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label for="download-csv" class="form-label"
+              >Download CSV file</label
+            >
+            <br />
+            <button
+              id="download-csv"
+              name="download-csv"
+              class="btn btn-primary"
+            >
+              Download &#10515;
+            </button>
+          </div>
+        </div>
+        <br />
+
+        <table id="results-table" class="table table-dark table-striped">
+          <thead>
+            <tr>
+              <th>Sequence ID</th>
+              <th>Start</th>
+              <th>End</th>
+              <th>Z-DNA Score</th>
+              <th>Sequence</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+
+        <div class="row">
+          <div class="col-md-6">
+            <h2 class="graph-headers">Z-Score over Sequence Length</h2>
+          </div>
+          <div class="col-md-6">
+            <h2 class="graph-headers">Z-Score Distribution</h2>
+          </div>
+        </div>
+    
+  
+        <div class="row">
+          <div class="col-md-6">
+            <canvas id="zScoreScatterPlot" width="100" height="100"></canvas>
+          </div>
+          <div class="col-md-6">
+            <canvas id="zScoreBoxPlot" width="100" height="100"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      
+
+      
+
+    </div>
+
+    <div id="footer-container"></div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Custom js -->
+    <script src="js/components.js"></script>
+
+    <script>
+      let csv_headers = [];
+      let csv_data = [];
+      let selected_sequence = "all";
+      let avg_score_per_sequence = {};
+
+      fetch("example/merged_fastas.fasta")
+        .then((response) => response.text())
+        .then((data) => {
+          $("#fasta-input").html(data);
+        })
+        .catch((error) => {
+          console.error("Error loading the file:", error);
+        });
+
+      let dataTable = $("#results-table").DataTable({
+        pageLength: 10,
+        lengthMenu: [
+          [10, 25, 50, -1],
+          [10, 25, 50, "All"],
+        ],
+        dom: '<"top"lf>rt<"bottom"ip><"clear">',
+        language: {
+          lengthMenu: "Show _MENU_ entries",
+          info: "Showing _START_ to _END_ of _TOTAL_ entries",
+          infoEmpty: "Showing 0 to 0 of 0 entries",
+          infoFiltered: "(filtered from _MAX_ total entries)",
+          search: "Search:",
+          paginate: {
+            first: "First",
+            last: "Last",
+            next: "Next",
+            previous: "Previous",
+          },
+        },
+      });
+
+      function chartJsDefauls() {
+        Chart.defaults.backgroundColor = "white";
+        Chart.defaults.borderColor = "gray";
+        Chart.defaults.color = "white";
+      }
+
+      function renderTable() {
+        // Clear any existing data in the table
+        dataTable.clear();
+
+        // Set truncation length
+        let truncationLength = 20;
+
+        // Add new rows to the DataTable with expandable logic for the first column
+        csv_data.forEach((row) => {
+          // Shallow copy row for displaying visualization without breaking data
+          let displayRow = [...row];
+          if (
+            selected_sequence === "all" ||
+            selected_sequence === displayRow[0]
+          ) {
+            // Truncate the first column if it's longer than the truncation length
+            let firstColumnContent = displayRow[0];
+            let truncatedContent =
+              firstColumnContent.length > truncationLength
+                ? firstColumnContent.substring(0, truncationLength) + "..."
+                : firstColumnContent;
+            displayRow[4] = createVisualization(displayRow[4]);
+
+            // Create the row data with the expandable first column
+            let rowData = [
+              `<span class="truncated-text">${truncatedContent}</span>
+                        ${
+                          firstColumnContent.length > truncationLength
+                            ? `<button class="btn expand-text" style="padding: 0; color:white;" data-fulltext="${firstColumnContent}">&#9660;</button>`
+                            : ""
+                        }`,
+              ...displayRow.slice(1), // Add the rest of the columns unchanged
+            ];
+
+            // Add the row to the DataTable
+            dataTable.row.add(rowData);
+          }
+        });
+
+        // Redraw the DataTable with the new data
+        dataTable.draw();
+
+        // Add the expand/collapse functionality
+        $("#results-table tbody")
+          .off("click", "button.expand-text")
+          .on("click", "button.expand-text", function () {
+            let fullText = $(this).data("fulltext");
+            let truncatedText = fullText.substring(0, truncationLength) + "...";
+            let isExpanded =
+              $(this).siblings(".truncated-text").text() !== truncatedText;
+
+            if (isExpanded) {
+              // Collapse to truncated text
+              $(this).siblings(".truncated-text").text(truncatedText);
+              $(this).html("&#9660;"); // down arrow for expand
+            } else {
+              // Expand to full text
+              $(this).siblings(".truncated-text").text(fullText);
+              $(this).html("&#9650;"); // up arrow for collapse
+            }
+          });
+      }
+
+      function calculateGCPercentage(sequence) {
+        // Convert sequence to uppercase to handle both cases
+
+        sequence = sequence.toString().toUpperCase();
+
+        // Initialize counter
+        let gcCount = 0;
+
+        // Count G and C occurrences
+        for (let base of sequence) {
+          if (base === "G" || base === "C") {
+            gcCount++;
+          }
+        }
+
+        // Calculate percentage
+        const gcPercentage = (gcCount / sequence.length) * 100;
+
+        return Number(gcPercentage.toFixed(2));
+      }
+
+      function calculateAndRenderMetadata() {
+        let unique_sequences_with_z_rows = new Set();
+        for (const row of csv_data) {
+          const seq_id = row[0];
+          const z_score = row[3];
+          unique_sequences_with_z_rows.add(seq_id);
+          let gc_percent = calculateGCPercentage(row[4]);
+          // If exists
+          if (seq_id in avg_score_per_sequence) {
+            avg_score_per_sequence[seq_id]["score"] += parseFloat(z_score);
+            avg_score_per_sequence[seq_id]["count"] += 1;
+            avg_score_per_sequence[seq_id]["gc_percent"] += gc_percent;
+          } else {
+            avg_score_per_sequence[seq_id] = {
+              score: parseFloat(z_score),
+              count: 1,
+              gc_percent: gc_percent,
+            };
+          }
+        }
+        let unique_sequences_select = $("#unique_sequences");
+        unique_sequences_select.find('option:not([value="all"])').remove();
+
+        unique_sequences_with_z_rows.forEach((sequence) => {
+          let total_score = avg_score_per_sequence[sequence]["score"];
+          let total_gc_percent = avg_score_per_sequence[sequence]["gc_percent"];
+          let total_count = avg_score_per_sequence[sequence]["count"];
+
+          let avg_z_score = (total_score / total_count).toFixed(2);
+          let avg_gc_percent = (total_gc_percent / total_count).toFixed(2);
+
+          unique_sequences_select.append(
+            new Option(
+              `${sequence} ( Z-Score: ${avg_z_score} ) ( GC : ${avg_gc_percent}% )`,
+              sequence
+            )
+          );
+        });
+
+        unique_sequences_select.off("change").on("change", function () {
+          selected_sequence = $(this).val();
+          console.log("Selected sequence:", selected_sequence);
+          renderTable();
+        });
+      }
+
+      $(document).ready(function () {
+
+        $('.graph-headers').hide(); // Shows
+
+        
+        $("#loader").hide();
+        chartJsDefauls();
+
+        $("#file-upload").on("change", function (e) {
+          let file = e.target.files[0];
+          let reader = new FileReader();
+          reader.onload = function (e) {
+            $("#fasta-input").val(e.target.result);
+          };
+          reader.readAsText(file);
+        });
+
+        $("#zseeker-form").on("submit", function (e) {
+          e.preventDefault();
+
+          let formData = new FormData();
+          formData.append("method", $("#method").val());
+          formData.append("GC_weight", $("#gc-weight").val());
+          formData.append("GT_weight", $("#gt-weight").val());
+          formData.append("AC_weight", $("#ac-weight").val());
+          formData.append("AT_weight", $("#at-weight").val());
+          formData.append(
+            "mismatch_penalty_type",
+            $("#mismatch-penalty-type").val()
+          );
+          formData.append(
+            "mismatch_penalty_starting_value",
+            $("#mismatch-penalty-start").val()
+          );
+          formData.append(
+            "mismatch_penalty_linear_delta",
+            $("#mismatch-penalty-delta").val()
+          );
+          formData.append("cadence_reward", $("#cadence-reward").val());
+          formData.append("threshold", $("#threshold").val());
+          formData.append(
+            "consecutive_AT_scoring",
+            $("#consecutive-at-scoring").val()
+          );
+          formData.append("n_jobs", $("#n-jobs").val());
+
+          // Attach either FASTA input text or uploaded file
+          if ($("#fasta-input").val()) {
+            let fastaBlob = new Blob([$("#fasta-input").val()], {
+              type: "text/plain",
+            });
+            formData.append("fasta", fastaBlob, "input.fasta");
+          } else {
+            let fastaFile = $("#file-upload")[0].files[0];
+            if (fastaFile) {
+              formData.append("fasta", fastaFile);
+            }
+          }
+          $("#loader").show();
+
+          $.ajax({
+            url: "http://localhost:8080/submit-job",
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+              console.log("Job completed successfully:", response);
+
+              csv_data = response.csv_data;
+              csv_headers = response.csv_headers;
+
+              calculateAndRenderMetadata();
+
+              renderTable();
+              renderScatterPlot();
+              renderBoxPlot();
+              $('.graph-headers').show(); // Shows
+
+
+              // Show the results table
+              $("#results").show();
+              $("#loader").hide();
+            },
+            error: function (xhr, status, error) {
+              console.error("Error occurred:", xhr, status, error);
+              alert("Failed to execute the job: " + xhr.responseJSON.error);
+            },
+          });
+        });
+
+        $("#download-csv").on("click", function () {
+          // Create CSV content
+          let csvContent = csv_headers.join(",") + "\n"; // Add headers as first row
+          csv_data.forEach((row) => {
+            csvContent += row.join(",") + "\n"; // Add each row as CSV row
+          });
+
+          // Create a Blob and link for download
+          let blob = new Blob([csvContent], {
+            type: "text/csv;charset=utf-8;",
+          });
+          let url = URL.createObjectURL(blob);
+
+          // Create a temporary link element and trigger download
+          let downloadLink = $("<a>")
+            .attr("href", url)
+            .attr("download", "output.csv")
+            .css("visibility", "hidden")
+            .appendTo("body");
+
+          downloadLink[0].click(); // Trigger click on the link
+          downloadLink.remove(); // Remove link after download
+          URL.revokeObjectURL(url); // Release memory for the object URL
+        });
+      });
+
+      function renderScatterPlot() {
+        const data = csv_data;
+        // Transform data and get z-score range for color scaling
+        const scatterData = data.map((row) => {
+          const zScore = parseFloat(row[3]);
+          const sequenceLength = row[4].length;
+          return { x: sequenceLength, y: zScore };
+        });
+
+        // Get min and max z-scores for color scaling
+        const zScores = scatterData.map((point) => point.y);
+        const minZ = Math.min(...zScores);
+        const maxZ = Math.max(...zScores);
+
+        // Create color array based on z-scores
+        const colors = scatterData.map((point) => {
+          const normalizedZ = (point.y - minZ) / (maxZ - minZ);
+          return `hsl(${220 - normalizedZ * 220}, 70%, 50%)`; // Blue to Red gradient
+        });
+
+        const ctx = document
+          .getElementById("zScoreScatterPlot")
+          .getContext("2d");
+
+        let chartInstance = Chart.getChart("zScoreScatterPlot");
+        if (chartInstance) {
+          chartInstance.destroy();
+        }
+
+        new Chart(ctx, {
+          type: "scatter",
+          data: {
+            datasets: [
+              {
+                label: "",
+                data: scatterData,
+                backgroundColor: colors,
+                borderColor: colors,
+                borderWidth: 1,
+                pointRadius: 5,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                display: true,
+                position: "top",
+                labels: {
+                  font: {
+                    size: 14, // Larger legend text
+                  },
+                },
+              },
+              tooltip: {
+                titleFont: {
+                  size: 14,
+                },
+                bodyFont: {
+                  size: 14,
+                },
+                callbacks: {
+                  label: function (context) {
+                    return `Sequence Length: ${
+                      context.raw.x
+                    }, Z-Score: ${context.raw.y.toFixed(2)}`;
+                  },
+                },
+              },
+            },
+            scales: {
+              x: {
+                type: "linear",
+                position: "bottom",
+                title: {
+                  display: true,
+                  text: "Sequence Length",
+                  font: {
+                    size: 14,
+                    weight: "bold",
+                  },
+                },
+                ticks: {
+                  font: {
+                    size: 12,
+                  },
+                },
+              },
+              y: {
+                title: {
+                  display: true,
+                  text: "Z-Score",
+                  font: {
+                    size: 14,
+                    weight: "bold",
+                  },
+                },
+                ticks: {
+                  font: {
+                    size: 12,
+                  },
+                },
+              },
+            },
+          },
+        });
+      }
+
+      function calculateStats(data) {
+        const sorted = data.sort((a, b) => a - b);
+        const q1 = sorted[Math.floor(sorted.length * 0.25)];
+        const median = sorted[Math.floor(sorted.length * 0.5)];
+        const q3 = sorted[Math.floor(sorted.length * 0.75)];
+        const min = sorted[0];
+        const max = sorted[sorted.length - 1];
+
+        return { min, q1, median, q3, max };
+      }
+
+      function renderBoxPlot() {
+        // Convert CSV data to numbers
+        let data = csv_data
+          .map((row) => parseFloat(row[3]))
+          .filter((val) => !isNaN(val));
+
+        // Sort data and calculate statistics
+        const sorted = data.sort((a, b) => a - b);
+        const stats = {
+          min: sorted[0],
+          max: sorted[sorted.length - 1],
+          q1: sorted[Math.floor(sorted.length * 0.25)],
+          median: sorted[Math.floor(sorted.length * 0.5)],
+          q3: sorted[Math.floor(sorted.length * 0.75)],
+        };
+
+        // Calculate scale bounds - round to nearest 10
+        const minScale = Math.floor(stats.min / 10) * 10 - 10;
+        const maxScale = Math.ceil(stats.max / 10) * 10 + 10;
+
+        const ctx = document.getElementById("zScoreBoxPlot");
+
+        let chartInstance = Chart.getChart("zScoreBoxPlot");
+        if (chartInstance) {
+          chartInstance.destroy();
+        }
+        new Chart(ctx, {
+          type: "scatter",
+          data: {
+            datasets: [
+              // Box fill
+              {
+                type: "bar",
+                label: "Box Fill",
+                data: [
+                  { x: (stats.q1 + stats.q3) / 2, y: 0.3 }, // Center position
+                ],
+                backgroundColor: "rgba(54, 162, 235, 0.2)",
+                borderColor: "rgba(54, 162, 235, 0)",
+                barThickness: stats.q3 - stats.q1,
+                barPercentage: 1.0,
+                categoryPercentage: 1.0,
+                base: 0.7, // Start at y=0.7
+                maxBarThickness: 0.6, // This should make it extend to y=1.3
+              },
+              // Box border
+              {
+                type: "line",
+                label: "Box Border",
+                data: [
+                  { x: stats.q1, y: 0.7 },
+                  { x: stats.q1, y: 1.3 },
+                  { x: stats.q3, y: 1.3 },
+                  { x: stats.q3, y: 0.7 },
+                  { x: stats.q1, y: 0.7 }, // Close the rectangle
+                ],
+                backgroundColor: "rgba(54, 162, 235, 0)",
+                borderColor: "rgb(54, 162, 235)",
+                borderWidth: 2,
+                fill: false,
+                pointRadius: 0,
+              },
+              // Median vertical line
+              {
+                type: "line",
+                data: [
+                  { x: stats.median, y: 0.7 },
+                  { x: stats.median, y: 1.3 },
+                ],
+                borderColor: "rgb(255, 206, 86)", // Yellow color
+                borderWidth: 2,
+                pointRadius: 0,
+              },
+              // Min vertical line
+              {
+                type: "line",
+                data: [
+                  { x: stats.min, y: 0.85 },
+                  { x: stats.min, y: 1.15 },
+                ],
+                borderColor: "rgb(255, 99, 132)",
+                borderWidth: 2,
+                pointRadius: 0,
+              },
+              // Max vertical line
+              {
+                type: "line",
+                data: [
+                  { x: stats.max, y: 0.85 },
+                  { x: stats.max, y: 1.15 },
+                ],
+                borderColor: "rgb(255, 99, 132)",
+                borderWidth: 2,
+                pointRadius: 0,
+              },
+              // Whiskers
+              {
+                type: "line",
+                data: [
+                  { x: stats.min, y: 1 },
+                  { x: stats.q1, y: 1 },
+                ],
+                borderColor: "rgb(54, 162, 235)",
+                borderWidth: 2,
+                pointRadius: 0,
+              },
+              {
+                type: "line",
+                data: [
+                  { x: stats.q3, y: 1 },
+                  { x: stats.max, y: 1 },
+                ],
+                borderColor: "rgb(54, 162, 235)",
+                borderWidth: 2,
+                pointRadius: 0,
+              },
+              // Data points
+              {
+                type: "scatter",
+                label: "Statistics",
+                data: [
+                  { x: stats.min, y: 1, label: "Minimum" },
+                  { x: stats.q1, y: 1, label: "Q1" },
+                  { x: stats.median, y: 1, label: "Median" },
+                  { x: stats.q3, y: 1, label: "Q3" },
+                  { x: stats.max, y: 1, label: "Maximum" },
+                ],
+                backgroundColor: [
+                  "rgb(255, 99, 132)", // min
+                  "rgb(54, 162, 235)", // q1
+                  "rgb(255, 206, 86)", // median
+                  "rgb(54, 162, 235)", // q3
+                  "rgb(255, 99, 132)", // max
+                ],
+                borderColor: "rgb(0, 0, 0)",
+                borderWidth: 2,
+                pointRadius: 6,
+                pointHoverRadius: 9,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false,
+              },
+              tooltip: {
+                enabled: true,
+                mode: "nearest",
+                intersect: true,
+                callbacks: {
+                  label: function (context) {
+                    const dataPoint = context.dataset.data[context.dataIndex];
+                    if (dataPoint.label) {
+                      return `${dataPoint.label}: ${dataPoint.x.toFixed(2)}`;
+                    }
+                    return null;
+                  },
+                },
+              },
+            },
+            scales: {
+              x: {
+                title: {
+                  display: true,
+                  text: "Z-Score Distribution",
+                  font: {
+                    size: 14,
+                    weight: "bold",
+                  },
+                },
+                min: minScale,
+                max: maxScale,
+                ticks: {
+                  stepSize: 10,
+                },
+              },
+              y: {
+                display: false,
+                min: 0.5,
+                max: 1.5,
+              },
+            },
+          },
+        });
+      }
+
+      function isValidDinucleotide(dinucleotide) {
+        const validPairs = ["GC", "CG", "GT", "TG", "AC", "CA", "AT", "TA"];
+        return validPairs.includes(dinucleotide);
+      }
+
+      function createVisualization(sequence) {
+    const wrapper = document.createElement("div");
+    wrapper.className = "sequence-wrapper";
+
+    const originalSpan = document.createElement("span");
+    originalSpan.className = "original-sequence";
+    originalSpan.textContent = sequence;
+    wrapper.appendChild(originalSpan);
+
+    const container = document.createElement("div");
+    container.className = "sequence-container";
+
+    sequence = sequence.toString().toUpperCase();
+    const nucleotides = [...sequence].map(n => {
+        const span = document.createElement("span");
+        span.className = "nucleotide";
+        span.textContent = n;
+        span.style.display = "inline-block";
+        return span;
+    });
+
+    // Simplified logic: just check each dinucleotide and color both nucleotides
+    for (let i = 0; i < sequence.length - 1; i++) {
+        const dinucleotide = sequence.substr(i, 2);
+        const colorClass = isValidDinucleotide(dinucleotide) ? "valid" : "invalid";
+        // Override any previous class
+        nucleotides[i].className = `nucleotide ${colorClass}`;
+        nucleotides[i + 1].className = `nucleotide ${colorClass}`;
+    }
+
+    nucleotides.forEach(n => container.appendChild(n));
+    wrapper.appendChild(container);
+
+    return wrapper.outerHTML;
+}
+
+    </script>
+  </body>
+</html>
