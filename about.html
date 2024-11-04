@@ -8,10 +8,8 @@
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
       rel="stylesheet"
     />
-    <link
-      href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap5.min.css"
-      rel="stylesheet"
-    />
+    <link rel="icon" type="image/x-icon" href="/img/favicon.ico">
+
     <style>
         .about-section .card {
             border-radius: 15px;
@@ -59,14 +57,14 @@
                                 <strong>Z-DNA</strong> is an alternative left-handed DNA conformation, distinct from the common right-handed B-DNA structure. It features a zigzag backbone due to its helical winding, which results from specific nucleotide sequences and supercoiling stresses. Z-DNA formation is associated with biological processes such as gene regulation, genomic instability, and can influence transcription and recombination events.
                             </p>
         
-                            <h4 class="card-title mt-4 mb-4">About the tool</h4>
+                            <h4 class="card-title mt-4 mb-4">About the Tool</h4>
                             <p class="card-text">
-                                This ZSeeker tool is a computational application designed to detect potential Z-DNA forming regions within DNA sequences. By analyzing nucleotide patterns and applying a specialized scoring system, it highlights regions that are likely to undergo a B-DNA to Z-DNA transition. This aids researchers in studying genomic regions that may play roles in gene expression regulation, genetic instability, and other biological functions influenced by Z-DNA.
+                                This ZSeeker tool is a computational application designed to detect potential Z-DNA-forming regions within DNA sequences. By analyzing nucleotide patterns and applying a specialized scoring system, it highlights regions that are likely to undergo a B-DNA to Z-DNA transition. This aids researchers in studying genomic regions that may play roles in gene expression regulation, genetic instability, and other biological functions influenced by Z-DNA.
                             </p>
         
                             <h4 class="card-title mt-4 mb-4">Algorithm Overview</h4>
                             <p class="card-text">
-                                The tool employs advanced algorithms that scan DNA sequences to identify Z-DNA prone regions. The core concept revolves around recognizing specific dinucleotide patterns and applying scores and penalties based on their likelihood to form Z-DNA. The algorithm incorporates three main methods:
+                                The tool employs advanced algorithms that scan DNA sequences to identify potential Z-DNA-forming sequences. The core concept revolves around recognizing specific dinucleotide patterns and applying scores and penalties based on their likelihood to form Z-DNA. The algorithm incorporates three main methods:
                             </p>
                             <ul class="list-group list-group-flush bg-dark">
                                 <li class="list-group-item bg-dark text-light border-secondary">
@@ -76,7 +74,7 @@
                                         <li><em>High Weight:</em> GC and CG pairs receive the highest score due to their strong propensity to form Z-DNA.</li>
                                         <li><em>Medium Weight:</em> GT/TG and AC/CA pairs are given moderate scores as they can contribute to Z-DNA formation under certain conditions.</li>
                                         <li><em>Low Weight:</em> AT and TA pairs receive lower scores.</li>
-                                        <li><em>Penalties:</em> Consecutive AT pairs and mismatches (unexpected dinucleotides) are penalized to reduce their impact on the overall score.</li>
+                                        <li><em>Penalties:</em> Consecutive AT pairs and mismatches (dinucleotide interruptions) are penalized to reduce their impact on the overall score.</li>
                                     </ul>
                                 </li>
                                 <li class="list-group-item bg-dark text-light border-secondary">
@@ -91,15 +89,15 @@
         
                             <h4 class="card-title mt-4 mb-4">Penalty Mechanisms</h4>
                             <p class="card-text">
-                                Penalties are applied to discourage sequences that deviate from Z-DNA favorable patterns. The algorithm uses two primary types of penalties:
+                                Penalties are applied to lower the score of sequences that deviate from Z-DNA favorable patterns. The algorithm uses two primary types of penalties:
                             </p>
                             <ul class="list-group list-group-flush bg-dark">
                                 <li class="list-group-item bg-dark text-light border-secondary">
-                                    <strong>Mismatch Penalties:</strong>
+                                    <strong>Dinucleotide Interruption Penalties:</strong>
                                     <ul>
-                                        <li>Applied when a dinucleotide does not match expected patterns (GC, CG, GT, TG, AC, CA, AT, TA).</li>
-                                        <li><em>Linear Penalty:</em> The default setting increases the penalty linearly with each consecutive mismatch. For example, the first mismatch may incur a penalty of -1.0, the second -3.0, the third -5.0, and so on.</li>
-                                        <li><em>Exponential Penalty:</em> Alternatively, penalties can increase exponentially, which rapidly reduces the score for sequences with multiple mismatches. This method includes a cap to prevent excessively large penalty values.</li>
+                                        <li>Applied when a checked dinucleotide does not match expected dinucleoteid patterns (GC, CG, GT, TG, AC, CA, AT, TA).</li>
+                                        <li><em>Linear Penalty:</em> The default setting increases the penalty linearly with each consecutive mismatch/interruption. For example, the first mismatch/interruption may incur a penalty of -1.0, the second -3.0, the third -5.0, and so on.</li>
+                                        <li><em>Exponential Penalty:</em> Alternatively, penalties can increase exponentially, which rapidly reduces the score for sequences with multiple mismatches/interruptions. This method includes a cap to prevent excessively large penalty values.</li>
                                     </ul>
                                 </li>
                                 <li class="list-group-item bg-dark text-light border-secondary">
@@ -111,14 +109,14 @@
                                                 <li>First 4 consecutive AT/TA pairs receive a slight bonus (+0.5).</li>
                                                 <li>5th and 6th pairs have no bonus (score of 0.0).</li>
                                                 <li>7th pair incurs a significant penalty (-5.0).</li>
-                                                <li>8th and subsequent pairs receive a severe penalty (-100.0), greatly reducing the likelihood of being identified as Z-DNA forming regions.</li>
+                                                <li>8th and subsequent pairs receive a severe penalty (-100.0), greatly reducing the likelihood of being identified as Z-DNA-forming regions.</li>
                                             </ul>
                                         </li>
                                     </ul>
                                 </li>
                             </ul>
                             <p class="card-text">
-                                These penalty mechanisms ensure that the scoring system accurately reflects the structural preferences of Z-DNA, favoring sequences with alternating purine-pyrimidine patterns and penalizing those that do not conform to the expected characteristics.
+                                These penalty mechanisms ensure that the scoring system accurately reflects the structural preferences of Z-DNA, favoring sequences with alternating purine-pyrimidine patterns and penalizing those that do not conform to the preferred characteristics for Z-DNA formation.
                             </p>
         
                             <h4 class="card-title mt-4 mb-4">Key Parameters</h4>
@@ -130,10 +128,10 @@
                                     <strong>GC Weight:</strong> Default 7.0. Adjusts the score contribution of GC and CG dinucleotides.
                                 </li>
                                 <li class="list-group-item bg-dark text-light border-secondary">
-                                    <strong>GT Weight:</strong> Default 1.0. Sets the score for GT and TG pairs.
+                                    <strong>GT Weight:</strong> Default 1.25. Sets the score for GT and TG pairs.
                                 </li>
                                 <li class="list-group-item bg-dark text-light border-secondary">
-                                    <strong>AC Weight:</strong> Default 1.0. Determines the score for AC and CA pairs.
+                                    <strong>AC Weight:</strong> Default 1.25. Determines the score for AC and CA pairs.
                                 </li>
                                 <li class="list-group-item bg-dark text-light border-secondary">
                                     <strong>AT Weight:</strong> Default 0.5. Defines the base score for AT and TA pairs before applying consecutive penalties.
@@ -141,6 +139,15 @@
                                 <li class="list-group-item bg-dark text-light border-secondary">
                                     <strong>Mismatch Penalty Type:</strong> Can be set to "linear" or "exponential" to control how mismatches affect the score.
                                 </li>
+                                <li class="list-group-item bg-dark text-light border-secondary">
+                                    <strong>Mismatch Penalty Starting Value:</strong> Integer value that defaults to 3 and is the negative value applied to mismtaches (multiplied by delta)
+                                </li>
+                                <li class="list-group-item bg-dark text-light border-secondary">
+                                    <strong>Mismatch Penalty Linear Delta:</strong> Factor that is applied to starting value either exponentially or linearly for each consecutive interruption of 
+                                </li>
+                                 
+
+
                                 <li class="list-group-item bg-dark text-light border-secondary">
                                     <strong>Threshold:</strong> Default 50. Determines the minimum cumulative score required for a region to be considered a potential Z-DNA forming sequence.
                                 </li>

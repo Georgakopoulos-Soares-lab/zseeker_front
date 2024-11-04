@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html data-bs-theme="dark">
+
+<head>
+    <title>ZSeeker</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link rel="icon" type="img/x-icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="icon" type="image/x-icon" href="/img/favicon.ico">
+
+    <style>
+
+
+.about-section .card {
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .about-section .list-group-item {
+            transition: background-color 0.3s ease;
+        }
+        
+        .about-section .list-group-item:hover {
+            background-color: #2c3034 !important;
+        }
+        
+        .about-section h4 {
+            color: #58c2ff;
+            font-weight: 600;
+        }
+        
+        .about-section p {
+            line-height: 1.6;
+        }
+    
+        .about-container {
+            font-size: xx-large;
+            font-family: monospace;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: "center";
+            padding-left: 6%;
+            padding-right: 6%;
+            padding-top: 5%;
+        }
+
+        .about-container h1 {
+            font-weight: 900;
+            color: white;
+        }
+
+        .about-container h2 {
+            font-weight: 900;
+            color: white;
+        }
+
+        .about-container img {
+            max-width: 100%;
+            height: auto;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .about-container img:hover {
+            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.7);
+        }
+
+    
+
+    </style>
+</head>
+
+<body>
+
+    <!-- Container for the Navbar -->
+    <div id="navbar-container"></div>
+
+
+    <div class="main-container">
+        <div class="about-section py-5" style="background-color: #212529; color: #fff;">
+            <div class="container">
+                <h2 class="text-center mb-4">ZSeeker Web Interface</h2>
+                
+                <div class="row">
+                    <div class="col-lg-8 mx-auto">
+                        <div class="card bg-dark text-light border-secondary">
+                            
+                            <div class="card-body">
+                                <h4 class="card-title mb-4">Introduction</h4>
+                                <p class="card-text">
+                                    The ZSeeker web interface is designed to provide a simple and accessible way to use the ZSeeker command-line tool. This web application is built using the Gin framework for backend operations in Go, while HTML, CSS, and JavaScript are used for the frontend. The main purpose of this interface is to make ZSeeker’s functionality easy to access. Users can submit jobs, inspect results, download data, and filter Z-DNA outputs directly from the web interface. Additionally, the application includes visual tools to help users understand Z-DNA regions better. For more information on the tool’s algorithms, visit the About/Contact page, and for guidance on using specific features, see the Help page.
+                                </p>
+                                <h4 class="card-title mb-4">Job Submission</h4>
+                                <p class="card-text">
+                                   This section displays the "Job Submission" page, where users can configure their analysis settings. Each parameter can be modified by clicking the input fields or typing directly. After setting the desired parameters, users can upload a FASTA file or paste sequences in the provided text area. Once ready, clicking "Submit" will send the job to the server for processing.
+                                </p>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="about-container">
+                    <img src="/zseeker_front/img/help/params.png"></img>
+                </div>
+                <br>
+                <br>
+
+                <div class="row">
+                    <div class="col-lg-8 mx-auto">
+                        <div class="card bg-dark text-light border-secondary">
+                            
+                            <div class="card-body">
+                                <h4 class="card-title mb-4">Results</h4>
+                                <p class="card-text">
+                                   After submitting a job, users will see the Z-DNA results displayed in a table format. The processing time may vary depending on file size and parameter settings. Results can be downloaded as a CSV file by clicking the "Download" button, and users can filter or sort the data for easier viewing. Additionally, users can select specific sequences from the input FASTA file by using the "Select Sequences" dropdown. This dropdown also shows the average Z-score and GC content for all detected sequences above the threshold. When users hover over a sequence, visual indicators highlight dinucleotides that contribute positively to the score in green, while interruptions that reduce the score appear in red.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="about-container">
+                    <img src="/zseeker_front/img/help/results.png"></img>
+                </div>
+                <br>
+                <br>
+
+                <div class="row">
+                    <div class="col-lg-8 mx-auto">
+                        <div class="card bg-dark text-light border-secondary">
+                            
+                            <div class="card-body">
+                                <h4 class="card-title mb-4">Visualizations</h4>
+                                <p class="card-text">
+                                   Each time a new job is submitted, two visualizations are generated. On the left, a scatter plot shows how sequence length affects Z-DNA scores, with a color scale for identifying outliers quickly. The second visualization is a box plot that gives a summary of Z-score values, including minimum, median, maximum, and first and third quartiles. These visualizations make it easier to interpret and compare the Z-DNA scores across different sequences.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="about-container">
+                    <img src="/zseeker_front/img/help/visualizations.png"></img>
+                </div>
+
+            </div>
+    
+    </div>
+    
+    <div id="footer-container"></div>
+</body>
+
+<script src="js/components.js"></script>
+
+</html>
