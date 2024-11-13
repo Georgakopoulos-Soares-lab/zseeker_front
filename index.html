@@ -201,14 +201,14 @@
       <!-- <h1 class="text-center mb-4">ZSeeker</h1> -->
       <form id="zseeker-form">
         <div class="row g-3">
-          <div class="col-md-12 mb-3">
+          <!-- <div class="col-md-12 mb-3">
             <label for="method" class="form-label">Method</label>
             <select class="form-select" id="method" name="method" required>
               <option value="transitions" selected>Transitions</option>
               <option value="coverage">Coverage</option>
               <option value="layered">Layered</option>
             </select>
-          </div>
+          </div> -->
           <div class="col-md-3">
             <label for="gc-weight" class="form-label">GC Weight</label>
             <input
@@ -674,7 +674,7 @@
           e.preventDefault();
 
           let formData = new FormData();
-          formData.append("method", $("#method").val());
+          // formData.append("method", $("#method").val());
           formData.append("GC_weight", $("#gc-weight").val());
           formData.append("GT_weight", $("#gt-weight").val());
           formData.append("AC_weight", $("#ac-weight").val());
