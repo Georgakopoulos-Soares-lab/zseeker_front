@@ -267,11 +267,11 @@
           </div>
           <br>
 
-          <div class="col-md-4">
+          <!-- <div class="col-md-4">
             <label for="n-jobs" class="form-label">N Jobs</label>
             <input type="number" class="form-control" id="n-jobs" name="n_jobs" value="8" required />
           </div>
-          <br>
+          <br> -->
           <div class="col-md-4">
             <button type="submit" class="btn btn-primary w-100">Submit</button>
           </div>
@@ -531,7 +531,7 @@
         formData.append("cadence_reward", $("#cadence-reward").val());
         formData.append("threshold", $("#threshold").val());
         formData.append("consecutive_AT_scoring", $("#consecutive-at-scoring").val());
-        formData.append("n_jobs", $("#n-jobs").val());
+        // formData.append("n_jobs", $("#n-jobs").val());
         // Attach either FASTA input text or uploaded file
         if ($("#fasta-input").val()) {
           let fastaBlob = new Blob([$("#fasta-input").val()], {
