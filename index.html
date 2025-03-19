@@ -110,7 +110,6 @@
       0% {
         transform: scale(0);
       }
-
       100% {
         transform: scale(1);
       }
@@ -120,7 +119,6 @@
       0% {
         transform: scale(1);
       }
-
       100% {
         transform: scale(0);
       }
@@ -130,7 +128,6 @@
       0% {
         transform: translate(0, 0);
       }
-
       100% {
         transform: translate(24px, 0);
       }
@@ -157,9 +154,7 @@
       padding: 5px;
       z-index: 1000;
       max-width: 600px;
-      /* or whatever width you want */
       white-space: normal;
-      /* overrides the previous nowrap */
     }
 
     .sequence-wrapper:hover .sequence-container {
@@ -184,6 +179,29 @@
       border-bottom: 2px solid red;
       color: black;
     }
+    
+    /* Updated CSS for scrollable Sequence column with a modern, minimal dark gray scrollbar */
+    .scrollable-sequence {
+      max-width: 300px; /* Adjust width as needed */
+      overflow-x: auto;
+      white-space: nowrap;
+      scrollbar-width: thin;             /* Firefox */
+      scrollbar-color: #555 #333;          /* Firefox thumb and track colors */
+    }
+    
+    /* WebKit-based browsers */
+    .scrollable-sequence::-webkit-scrollbar {
+      height: 6px;
+    }
+    
+    .scrollable-sequence::-webkit-scrollbar-track {
+      background: #333;
+    }
+    
+    .scrollable-sequence::-webkit-scrollbar-thumb {
+      background: #555;
+      border-radius: 3px;
+    }
   </style>
 </head>
 <body>
@@ -193,14 +211,7 @@
     <!-- <h1 class="text-center mb-4">ZSeeker</h1> -->
     <form id="zseeker-form">
       <div class="row g-3">
-        <!-- <div class="col-md-12 mb-3">
-            <label for="method" class="form-label">Method</label>
-            <select class="form-select" id="method" name="method" required>
-              <option value="transitions" selected>Transitions</option>
-              <option value="coverage">Coverage</option>
-              <option value="layered">Layered</option>
-            </select>
-          </div> -->
+        <!-- Advanced parameters button -->
         <div class="col-12 ">
           <button class="btn btn-dark border-secondary d-flex align-items-center justify-content-between w-100" type="button" data-bs-toggle="collapse" data-bs-target="#advancedParams" aria-expanded="false" aria-controls="advancedParams">
             <span>Advanced Algorithm Parameters</span>
@@ -260,18 +271,11 @@
             <textarea class="form-control" id="fasta-input" name="fasta_input" rows="5"></textarea>
           </div>
           <br>
-
           <div class="col-md-4">
             <label for="file-upload" class="form-label">Or Upload FASTA File</label>
             <input type="file" class="form-control" id="file-upload" accept=".fasta,.fa,.txt" />
           </div>
           <br>
-
-          <!-- <div class="col-md-4">
-            <label for="n-jobs" class="form-label">N Jobs</label>
-            <input type="number" class="form-control" id="n-jobs" name="n_jobs" value="8" required />
-          </div>
-          <br> -->
           <div class="col-md-4">
             <button type="submit" class="btn btn-primary w-100">Submit</button>
           </div>
@@ -401,74 +405,56 @@
         },
       },
     });
-    // Rest of your code remains the same...
     function chartJsDefauls() {
       Chart.defaults.backgroundColor = "white";
       Chart.defaults.borderColor = "gray";
       Chart.defaults.color = "white";
     }
-
     function renderTable() {
-      // Clear any existing data in the table
       dataTable.clear();
-      // Set truncation length
       let truncationLength = 20;
-      // Add new rows to the DataTable with expandable logic for the first column
       csv_data.forEach((row) => {
-        // Shallow copy row for displaying visualization without breaking data
         let displayRow = [...row];
         if (selected_sequence === "all" || selected_sequence === displayRow[0]) {
-          // Truncate the first column if it's longer than the truncation length
           let firstColumnContent = displayRow[0];
           let truncatedContent = firstColumnContent.length > truncationLength ? firstColumnContent.substring(0, truncationLength) + "..." : firstColumnContent;
-          displayRow[4] = createVisualization(displayRow[4]);
-          // Create the row data with the expandable first column
-          let rowData = [`<span class="truncated-text">${truncatedContent}</span>
-                        ${
-                          firstColumnContent.length > truncationLength
-                            ? `<button class="btn expand-text" style="padding: 0; color:white;" data-fulltext="${firstColumnContent}">&#9660;</button>`
-                            : ""
-                        }`, ...displayRow.slice(1), // Add the rest of the columns unchanged
+          displayRow[4] = `<div class="scrollable-sequence">${createVisualization(displayRow[4])}</div>`;
+          let rowData = [
+            `<span class="truncated-text">${truncatedContent}</span>
+            ${firstColumnContent.length > truncationLength
+              ? `<button class="btn expand-text" style="padding: 0; color:white;" data-fulltext="${firstColumnContent}">&#9660;</button>`
+              : ""
+            }`,
+            ...displayRow.slice(1)
           ];
-          // Add the row to the DataTable
           dataTable.row.add(rowData);
         }
       });
-      // Redraw the DataTable with the new data
       dataTable.draw();
-      // Add the expand/collapse functionality
       $("#results-table tbody").off("click", "button.expand-text").on("click", "button.expand-text", function() {
         let fullText = $(this).data("fulltext");
         let truncatedText = fullText.substring(0, truncationLength) + "...";
         let isExpanded = $(this).siblings(".truncated-text").text() !== truncatedText;
         if (isExpanded) {
-          // Collapse to truncated text
           $(this).siblings(".truncated-text").text(truncatedText);
-          $(this).html("&#9660;"); // down arrow for expand
+          $(this).html("&#9660;");
         } else {
-          // Expand to full text
           $(this).siblings(".truncated-text").text(fullText);
-          $(this).html("&#9650;"); // up arrow for collapse
+          $(this).html("&#9650;");
         }
       });
     }
-
     function calculateGCPercentage(sequence) {
-      // Convert sequence to uppercase to handle both cases
       sequence = sequence.toString().toUpperCase();
-      // Initialize counter
       let gcCount = 0;
-      // Count G and C occurrences
       for (let base of sequence) {
         if (base === "G" || base === "C") {
           gcCount++;
         }
       }
-      // Calculate percentage
       const gcPercentage = (gcCount / sequence.length) * 100;
       return Number(gcPercentage.toFixed(2));
     }
-
     function calculateAndRenderMetadata() {
       let unique_sequences_with_z_rows = new Set();
       for (const row of csv_data) {
@@ -476,7 +462,6 @@
         const z_score = row[3];
         unique_sequences_with_z_rows.add(seq_id);
         let gc_percent = calculateGCPercentage(row[4]);
-        // If exists
         if (seq_id in avg_score_per_sequence) {
           avg_score_per_sequence[seq_id]["score"] += parseFloat(z_score);
           avg_score_per_sequence[seq_id]["count"] += 1;
@@ -506,7 +491,7 @@
       });
     }
     $(document).ready(function() {
-      $(".graph-headers").hide(); // Shows
+      $(".graph-headers").hide();
       $("#loader").hide();
       chartJsDefauls();
       $("#file-upload").on("change", function(e) {
@@ -520,7 +505,6 @@
       $("#zseeker-form").on("submit", function(e) {
         e.preventDefault();
         let formData = new FormData();
-        // formData.append("method", $("#method").val());
         formData.append("GC_weight", $("#gc-weight").val());
         formData.append("GT_weight", $("#gt-weight").val());
         formData.append("AC_weight", $("#ac-weight").val());
@@ -531,12 +515,8 @@
         formData.append("cadence_reward", $("#cadence-reward").val());
         formData.append("threshold", $("#threshold").val());
         formData.append("consecutive_AT_scoring", $("#consecutive-at-scoring").val());
-        // formData.append("n_jobs", $("#n-jobs").val());
-        // Attach either FASTA input text or uploaded file
         if ($("#fasta-input").val()) {
-          let fastaBlob = new Blob([$("#fasta-input").val()], {
-            type: "text/plain",
-          });
+          let fastaBlob = new Blob([$("#fasta-input").val()], { type: "text/plain" });
           formData.append("fasta", fastaBlob, "input.fasta");
         } else {
           let fastaFile = $("#file-upload")[0].files[0];
@@ -545,8 +525,7 @@
           }
         }
         $("#loader").show();
-        const backend_url = window.location.hostname.includes("localhost") || window.location.hostname.includes("127.0.0.1") ? "http://localhost:8080" // Dev
-          : "https://www.microsatellitesexplorer.com/zseeker_api"; // Prod
+        const backend_url = window.location.hostname.includes("localhost") || window.location.hostname.includes("127.0.0.1") ? "http://localhost:8080" : "https://www.microsatellitesexplorer.com/zseeker_api";
         $.ajax({
           url: `${backend_url}/submit-job`,
           type: "POST",
@@ -561,8 +540,7 @@
             renderTable();
             renderScatterPlot();
             renderBoxPlot();
-            $(".graph-headers").show(); // Shows
-            // Show the results table
+            $(".graph-headers").show();
             $("#results").show();
             $("#loader").hide();
           },
@@ -573,43 +551,31 @@
         });
       });
       $("#download-csv").on("click", function() {
-        // Create CSV content
-        let csvContent = csv_headers.join(",") + "\n"; // Add headers as first row
+        let csvContent = csv_headers.join(",") + "\n";
         csv_data.forEach((row) => {
-          csvContent += row.join(",") + "\n"; // Add each row as CSV row
+          csvContent += row.join(",") + "\n";
         });
-        // Create a Blob and link for download
-        let blob = new Blob([csvContent], {
-          type: "text/csv;charset=utf-8;",
-        });
+        let blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
         let url = URL.createObjectURL(blob);
-        // Create a temporary link element and trigger download
         let downloadLink = $("<a>").attr("href", url).attr("download", "output.csv").css("visibility", "hidden").appendTo("body");
-        downloadLink[0].click(); // Trigger click on the link
-        downloadLink.remove(); // Remove link after download
-        URL.revokeObjectURL(url); // Release memory for the object URL
+        downloadLink[0].click();
+        downloadLink.remove();
+        URL.revokeObjectURL(url);
       });
     });
-
     function renderScatterPlot() {
       const data = csv_data;
-      // Transform data and get z-score range for color scaling
       const scatterData = data.map((row) => {
         const zScore = parseFloat(row[3]);
         const sequenceLength = row[4].length;
-        return {
-          x: sequenceLength,
-          y: zScore
-        };
+        return { x: sequenceLength, y: zScore };
       });
-      // Get min and max z-scores for color scaling
       const zScores = scatterData.map((point) => point.y);
       const minZ = Math.min(...zScores);
       const maxZ = Math.max(...zScores);
-      // Create color array based on z-scores
       const colors = scatterData.map((point) => {
         const normalizedZ = (point.y - minZ) / (maxZ - minZ);
-        return `hsl(${220 - normalizedZ * 220}, 70%, 50%)`; // Blue to Red gradient
+        return `hsl(${220 - normalizedZ * 220}, 70%, 50%)`;
       });
       const ctx = document.getElementById("zScoreScatterPlot").getContext("2d");
       let chartInstance = Chart.getChart("zScoreScatterPlot");
@@ -626,26 +592,18 @@
             borderColor: colors,
             borderWidth: 1,
             pointRadius: 5,
-          }, ],
+          }],
         },
         options: {
           responsive: true,
           plugins: {
-            legend: {
-              display: false, // Changed this line from true to false
-            },
+            legend: { display: false },
             tooltip: {
-              titleFont: {
-                size: 14,
-              },
-              bodyFont: {
-                size: 14,
-              },
+              titleFont: { size: 14 },
+              bodyFont: { size: 14 },
               callbacks: {
                 label: function(context) {
-                  return `Sequence Length: ${
-                      context.raw.x
-                    }, Z-Score: ${context.raw.y.toFixed(2)}`;
+                  return `Sequence Length: ${context.raw.x}, Z-Score: ${context.raw.y.toFixed(2)}`;
                 },
               },
             },
@@ -657,37 +615,22 @@
               title: {
                 display: true,
                 text: "Sequence Length",
-                font: {
-                  size: 14,
-                  weight: "bold",
-                },
+                font: { size: 14, weight: "bold" },
               },
-              ticks: {
-                font: {
-                  size: 12,
-                },
-              },
+              ticks: { font: { size: 12 } },
             },
             y: {
               title: {
                 display: true,
                 text: "Z-Score",
-                font: {
-                  size: 14,
-                  weight: "bold",
-                },
+                font: { size: 14, weight: "bold" },
               },
-              ticks: {
-                font: {
-                  size: 12,
-                },
-              },
+              ticks: { font: { size: 12 } },
             },
           },
         },
       });
     }
-
     function calculateStats(data) {
       const sorted = data.sort((a, b) => a - b);
       const q1 = sorted[Math.floor(sorted.length * 0.25)];
@@ -695,19 +638,10 @@
       const q3 = sorted[Math.floor(sorted.length * 0.75)];
       const min = sorted[0];
       const max = sorted[sorted.length - 1];
-      return {
-        min,
-        q1,
-        median,
-        q3,
-        max
-      };
+      return { min, q1, median, q3, max };
     }
-
     function renderBoxPlot() {
-      // Convert CSV data to numbers
       let data = csv_data.map((row) => parseFloat(row[3])).filter((val) => !isNaN(val));
-      // Sort data and calculate statistics
       const sorted = data.sort((a, b) => a - b);
       const stats = {
         min: sorted[0],
@@ -716,7 +650,6 @@
         median: sorted[Math.floor(sorted.length * 0.5)],
         q3: sorted[Math.floor(sorted.length * 0.75)],
       };
-      // Calculate scale bounds - round to nearest 10
       const minScale = Math.floor(stats.min / 10) * 10 - 10;
       const maxScale = Math.ceil(stats.max / 10) * 10 + 10;
       const ctx = document.getElementById("zScoreBoxPlot");
@@ -728,43 +661,27 @@
         type: "scatter",
         data: {
           datasets: [
-            // Box fill
             {
               type: "bar",
               label: "Box Fill",
-              data: [{
-                  x: (stats.q1 + stats.q3) / 2,
-                  y: 0.3
-                }, // Center position
-              ],
+              data: [{ x: (stats.q1 + stats.q3) / 2, y: 0.3 }],
               backgroundColor: "rgba(54, 162, 235, 0.2)",
               borderColor: "rgba(54, 162, 235, 0)",
               barThickness: stats.q3 - stats.q1,
               barPercentage: 1.0,
               categoryPercentage: 1.0,
-              base: 0.7, // Start at y=0.7
-              maxBarThickness: 0.6, // This should make it extend to y=1.3
+              base: 0.7,
+              maxBarThickness: 0.6,
             },
-            // Box border
             {
               type: "line",
               label: "Box Border",
-              data: [{
-                  x: stats.q1,
-                  y: 0.7
-                }, {
-                  x: stats.q1,
-                  y: 1.3
-                }, {
-                  x: stats.q3,
-                  y: 1.3
-                }, {
-                  x: stats.q3,
-                  y: 0.7
-                }, {
-                  x: stats.q1,
-                  y: 0.7
-                }, // Close the rectangle
+              data: [
+                { x: stats.q1, y: 0.7 },
+                { x: stats.q1, y: 1.3 },
+                { x: stats.q3, y: 1.3 },
+                { x: stats.q3, y: 0.7 },
+                { x: stats.q1, y: 0.7 }
               ],
               backgroundColor: "rgba(54, 162, 235, 0)",
               borderColor: "rgb(54, 162, 235)",
@@ -772,104 +689,57 @@
               fill: false,
               pointRadius: 0,
             },
-            // Median vertical line
             {
               type: "line",
-              data: [{
-                x: stats.median,
-                y: 0.7
-              }, {
-                x: stats.median,
-                y: 1.3
-              }, ],
-              borderColor: "rgb(255, 206, 86)", // Yellow color
+              data: [{ x: stats.median, y: 0.7 }, { x: stats.median, y: 1.3 }],
+              borderColor: "rgb(255, 206, 86)",
               borderWidth: 2,
               pointRadius: 0,
             },
-            // Min vertical line
             {
               type: "line",
-              data: [{
-                x: stats.min,
-                y: 0.85
-              }, {
-                x: stats.min,
-                y: 1.15
-              }, ],
+              data: [{ x: stats.min, y: 0.85 }, { x: stats.min, y: 1.15 }],
               borderColor: "rgb(255, 99, 132)",
               borderWidth: 2,
               pointRadius: 0,
             },
-            // Max vertical line
             {
               type: "line",
-              data: [{
-                x: stats.max,
-                y: 0.85
-              }, {
-                x: stats.max,
-                y: 1.15
-              }, ],
+              data: [{ x: stats.max, y: 0.85 }, { x: stats.max, y: 1.15 }],
               borderColor: "rgb(255, 99, 132)",
               borderWidth: 2,
               pointRadius: 0,
             },
-            // Whiskers
             {
               type: "line",
-              data: [{
-                x: stats.min,
-                y: 1
-              }, {
-                x: stats.q1,
-                y: 1
-              }, ],
-              borderColor: "rgb(54, 162, 235)",
-              borderWidth: 2,
-              pointRadius: 0,
-            }, {
-              type: "line",
-              data: [{
-                x: stats.q3,
-                y: 1
-              }, {
-                x: stats.max,
-                y: 1
-              }, ],
+              data: [{ x: stats.min, y: 1 }, { x: stats.q1, y: 1 }],
               borderColor: "rgb(54, 162, 235)",
               borderWidth: 2,
               pointRadius: 0,
             },
-            // Data points
+            {
+              type: "line",
+              data: [{ x: stats.q3, y: 1 }, { x: stats.max, y: 1 }],
+              borderColor: "rgb(54, 162, 235)",
+              borderWidth: 2,
+              pointRadius: 0,
+            },
             {
               type: "scatter",
               label: "Statistics",
-              data: [{
-                x: stats.min,
-                y: 1,
-                label: "Minimum"
-              }, {
-                x: stats.q1,
-                y: 1,
-                label: "Q1"
-              }, {
-                x: stats.median,
-                y: 1,
-                label: "Median"
-              }, {
-                x: stats.q3,
-                y: 1,
-                label: "Q3"
-              }, {
-                x: stats.max,
-                y: 1,
-                label: "Maximum"
-              }, ],
-              backgroundColor: ["rgb(255, 99, 132)", // min
-                "rgb(54, 162, 235)", // q1
-                "rgb(255, 206, 86)", // median
-                "rgb(54, 162, 235)", // q3
-                "rgb(255, 99, 132)", // max
+              data: [
+                { x: stats.min, y: 1, label: "Minimum" },
+                { x: stats.q1, y: 1, label: "Q1" },
+                { x: stats.median, y: 1, label: "Median" },
+                { x: stats.q3, y: 1, label: "Q3" },
+                { x: stats.max, y: 1, label: "Maximum" }
+              ],
+              backgroundColor: [
+                "rgb(255, 99, 132)",
+                "rgb(54, 162, 235)",
+                "rgb(255, 206, 86)",
+                "rgb(54, 162, 235)",
+                "rgb(255, 99, 132)"
               ],
               borderColor: "rgb(0, 0, 0)",
               borderWidth: 2,
@@ -882,9 +752,7 @@
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: {
-              display: false,
-            },
+            legend: { display: false },
             tooltip: {
               enabled: true,
               mode: "nearest",
@@ -905,32 +773,21 @@
               title: {
                 display: true,
                 text: "Z-Score Distribution",
-                font: {
-                  size: 14,
-                  weight: "bold",
-                },
+                font: { size: 14, weight: "bold" },
               },
               min: minScale,
               max: maxScale,
-              ticks: {
-                stepSize: 10,
-              },
+              ticks: { stepSize: 10 },
             },
-            y: {
-              display: false,
-              min: 0.5,
-              max: 1.5,
-            },
+            y: { display: false, min: 0.5, max: 1.5 },
           },
         },
       });
     }
-
     function isValidDinucleotide(dinucleotide) {
       const validPairs = ["GC", "CG", "GT", "TG", "AC", "CA", "AT", "TA"];
       return validPairs.includes(dinucleotide);
     }
-
     function createVisualization(sequence) {
       const wrapper = document.createElement("div");
       wrapper.className = "sequence-wrapper";
@@ -948,11 +805,9 @@
         span.style.display = "inline-block";
         return span;
       });
-      // Simplified logic: just check each dinucleotide and color both nucleotides
       for (let i = 0; i < sequence.length - 1; i++) {
         const dinucleotide = sequence.substr(i, 2);
         const colorClass = isValidDinucleotide(dinucleotide) ? "valid" : "invalid";
-        // Override any previous class
         nucleotides[i].className = `nucleotide ${colorClass}`;
         nucleotides[i + 1].className = `nucleotide ${colorClass}`;
       }
