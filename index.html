@@ -14,6 +14,7 @@
     rel="stylesheet"
     crossorigin="anonymous"
   />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <link rel="icon" type="image/x-icon" href="/img/favicon.ico" />
   <style>
     body {
@@ -186,6 +187,33 @@
       background: #555;
       border-radius: 3px;
     }
+
+    /* Tooltip styling */
+    .tooltip-text {
+      position: relative;
+      display: inline-block;
+      cursor: pointer;
+    }
+    .tooltip-text .tooltip {
+      visibility: hidden;
+      width: 300px;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 5px;
+      padding: 5px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%; /* Position above the text */
+      left: 50%;
+      margin-left: -150px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .tooltip-text:hover .tooltip {
+      visibility: visible;
+      opacity: 1;
+    }
   </style>
 </head>
 <body>
@@ -351,7 +379,7 @@
           </div>
           <br />
           <div class="col-md-4">
-            <label for="file-upload" class="form-label">Or Upload FASTA File</label>
+            <label for="file-upload" class="form-label">Or Upload FASTA File <span class="tooltip-text">( <i class="fa fa-info-circle" aria-hidden="true"></i> max 15MB )<span class="tooltip">For larger file sizes please use the CLI locally, found at: <a href="https://github.com/Georgakopoulos-Soares-lab/ZSeeker" target="_blank">https://github.com/Georgakopoulos-Soares-lab/ZSeeker</a></span></span></label>
             <input
               type="file"
               class="form-control"
