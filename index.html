@@ -353,9 +353,36 @@
                     required
                   />
                 </div>
+
+                <!-- NEW FIELDS -->
+                <div class="col-md-4">
+                  <label for="drop-threshold" class="form-label">Drop Threshold</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="drop-threshold"
+                    name="drop_threshold"
+                    value="50"
+                    required
+                  />
+                </div>
+                <div class="col-md-4">
+                  <label for="total-sequence-scoring" class="form-label">Total Sequence Scoring</label>
+                  <br />
+                  <input
+                    type="checkbox"
+                    class="form-check-input"
+                    id="total-sequence-scoring"
+                    name="total_sequence_scoring"
+                  />
+                  <label class="form-check-label" for="total-sequence-scoring">
+                    Enable
+                  </label>
+                </div>
               </div>
             </div>
           </div>
+          <!-- threshold outside advanced params, keep as is -->
           <div class="col-md-4">
             <label for="threshold" class="form-label">Threshold</label>
             <input
@@ -379,7 +406,17 @@
           </div>
           <br />
           <div class="col-md-4">
-            <label for="file-upload" class="form-label">Or Upload FASTA File <span class="tooltip-text">( <i class="fa fa-info-circle" aria-hidden="true"></i> max 15MB )<span class="tooltip">For larger file sizes please use the CLI locally, found at: <a href="https://github.com/Georgakopoulos-Soares-lab/ZSeeker" target="_blank">https://github.com/Georgakopoulos-Soares-lab/ZSeeker</a></span></span></label>
+            <label for="file-upload" class="form-label">Or Upload FASTA File 
+              <span class="tooltip-text">( 
+                <i class="fa fa-info-circle" aria-hidden="true"></i> max 15MB )
+                <span class="tooltip">
+                  For larger file sizes please use the CLI locally, found at:
+                  <a href="https://github.com/Georgakopoulos-Soares-lab/ZSeeker" target="_blank">
+                    https://github.com/Georgakopoulos-Soares-lab/ZSeeker
+                  </a>
+                </span>
+              </span>
+            </label>
             <input
               type="file"
               class="form-control"
@@ -473,7 +510,6 @@
     src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap5.min.js"
     crossorigin="anonymous"
   ></script>
-  <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js" crossorigin="anonymous"></script> -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js" crossorigin="anonymous"></script>
   <!-- Custom js -->
   <script src="js/components.js"></script>
@@ -573,9 +609,7 @@
               ? firstColumnContent.substring(0, truncationLength) + "..."
               : firstColumnContent;
 
-          // Here we place the tile-visualization and the raw text in two separate structures
-          // 1) scrollable-sequence holds only the raw text
-          // 2) an absolutely positioned tile container that won't scroll
+          // Build the final sequence cell with visualization
           displayRow[4] = `
             <div class="sequence-wrapper">
               <div class="scrollable-sequence">
@@ -717,9 +751,16 @@
           "mismatch_penalty_linear_delta",
           $("#mismatch-penalty-delta").val()
         );
-        formData.append("cadence_reward", $("#cadence-reward").val());
         formData.append("threshold", $("#threshold").val());
         formData.append("consecutive_AT_scoring", $("#consecutive-at-scoring").val());
+
+        // New parameters
+        formData.append("drop_threshold", $("#drop-threshold").val());
+        // If the checkbox is checked, we'll pass "true", otherwise "false"
+        formData.append(
+          "total_sequence_scoring",
+          $("#total-sequence-scoring").is(":checked").toString()
+        );
 
         // FASTA from textarea or file
         if ($("#fasta-input").val()) {
@@ -761,7 +802,12 @@
           },
           error: function (xhr, status, error) {
             console.error("Error occurred:", xhr, status, error);
-            alert("Failed to execute the job: " + xhr.responseJSON.error);
+            if (xhr.responseJSON && xhr.responseJSON.error) {
+              alert("Failed to execute the job: " + xhr.responseJSON.error);
+            } else {
+              alert("Failed to execute the job.");
+            }
+            $("#loader").hide();
           },
         });
       });
@@ -839,8 +885,8 @@
             {
               label: "",
               data: scatterData,
-              backgroundColor: colors, // Assign colors to points
-              borderColor: colors, // Assign border colors to points
+              backgroundColor: colors,
+              borderColor: colors,
               pointRadius: 5,
               pointHoverRadius: 8,
             },
@@ -1097,9 +1143,6 @@
 
     // Creates the hover-based tile visualization
     function createVisualization(sequence) {
-      // .sequence-wrapper & .sequence-container are built as HTML
-      // so they remain absolutely positioned and won't scroll horizontally.
-      // We'll generate it as a string to embed in the final cell.
       const seqUpper = sequence.toString().toUpperCase();
       const chars = [...seqUpper];
       const nucleotides = chars.map((n) => `<span class="nucleotide">${n}</span>`);
@@ -1114,7 +1157,6 @@
       }
 
       // Build the container
-      // We'll return only the <div class="sequence-container"> ... </div>
       return `
         <div class="sequence-container">
           ${nucleotides.join("")}
